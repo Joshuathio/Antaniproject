@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Transaksi - Toko Pertanian</title>
+    <link rel="stylesheet" href="riwayat.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">
+            ← Kembali ke Halaman Utama
+        </a>
+        
+        <h1>📊 Riwayat Transaksi</h1>
+        
+        <!-- Statistics Cards -->
+        <div class="transaction-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <h4>Total Transaksi</h4>
+                <div class="stat-value" id="totalTransactions">0</div>
+            </div>
+            <div class="stat-card masuk">
+                <div class="stat-icon">📥</div>
+                <h4>Barang Masuk</h4>
+                <div class="stat-value" id="totalMasuk">0</div>
+            </div>
+            <div class="stat-card keluar">
+                <div class="stat-icon">📤</div>
+                <h4>Barang Keluar</h4>
+                <div class="stat-value" id="totalKeluar">0</div>
+            </div>
+            <div class="stat-card pindah">
+                <div class="stat-icon">🚚</div>
+                <h4>Pindah Gudang</h4>
+                <div class="stat-value" id="totalPindah">0</div>
+            </div>
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="form-section">
+            <h2 class="form-title">🔍 Filter & Pencarian</h2>
+            <div class="filter-section">
+                <div class="form-group">
+                    <input type="text" id="searchBox" placeholder="🔍 Cari barang atau keterangan..." onkeyup="filterTransactions()">
+                </div>
+                <div class="form-group">
+                    <select id="filterType" onchange="filterTransactions()">
+                        <option value="">Semua Transaksi</option>
+                        <option value="masuk">Barang Masuk</option>
+                        <option value="keluar">Barang Keluar</option>
+                        <option value="pindah">Pindah Gudang</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="filterWarehouse" onchange="filterTransactions()">
+                        <option value="">Semua Gudang</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="date" id="filterDate" onchange="filterTransactions()">
+                </div>
+                <div class="form-group">
+                    <button class="btn clear-filters" onclick="clearFilters()">🔄 Reset Filter</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transaction List -->
+        <div class="form-section">
+            <div class="transaction-header">
+                <h2 class="form-title">📋 Daftar Transaksi</h2>
+                <button class="btn export-button" onclick="exportTransactions()">📥 Export Riwayat</button>
+            </div>
+            
+            <div class="transactions-container" id="transactionsContainer">
+                <div class="loading-container">
+                    <div class="loading"></div>
+                    <p>Memuat riwayat transaksi...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load data from localStorage
+        let transactions = [];
+        let inventory = [];
+        let warehouses = [];
+        
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem('tokoPerananianData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    transactions = data.transactions || [];
+                    inventory = data.inventory || [];
+                    warehouses = data.warehouses || [];
+                    console.log('Data loaded:', transactions.length + ' transactions');
+                }
+            } catch (error) {
+                console.error('Failed to load data:', error);
+            }
+        }
+        
+        // Format currency
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Update warehouse filter
+        function updateWarehouseFilter() {
+            const select = document.getElementById('filterWarehouse');
+            select.innerHTML = '<option value="">Semua Gudang</option>';
+            
+            warehouses.forEach(warehouse => {
+                const option = document.createElement('option');
+                option.value = warehouse.id;
+                option.textContent = warehouse.name;
+                select.appendChild(option);
+            });
+        }
+        
+        // Update statistics
+        function updateStatistics() {
+            const totalTransactions = transactions.length;
+            const totalMasuk = transactions.filter(t => t.type === 'masuk').length;
+            const totalKeluar = transactions.filter(t => t.type === 'keluar').length;
+            const totalPindah = transactions.filter(t => t.type === 'pindah').length;
+            
+            document.getElementById('totalTransactions').textContent = totalTransactions;
+            document.getElementById('totalMasuk').textContent = totalMasuk;
+            document.getElementById('totalKeluar').textContent = totalKeluar;
+            document.getElementById('totalPindah').textContent = totalPindah;
+        }
+        
+        // Display transactions
+        function displayTransactions(transactionsToShow = transactions) {
+            const container = document.getElementById('transactionsContainer');
+            
+            // Remove loading animation
+            const loadingContainer = container.querySelector('.loading-container');
+            if (loadingContainer) {
+                loadingContainer.remove();
+            }
+            
+            if (transactionsToShow.length === 0) {
+                container.innerHTML = `
+                    <div class="no-transactions">
+                        <div class="empty-icon">📦</div>
+                        <h3>Tidak ada transaksi</h3>
+                        <p>Belum ada transaksi yang sesuai dengan filter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by date (newest first)
+            const sortedTransactions = [...transactionsToShow].sort((a, b) => {
+                const dateCompare = new Date(b.date) - new Date(a.date);
+                if (dateCompare === 0) {
+                    return new Date(b.timestamp) - new Date(a.timestamp);
+                }
+                return dateCompare;
+            });
+            
+            container.innerHTML = sortedTransactions.map(transaction => {
+                const date = new Date(transaction.date).toLocaleDateString('id-ID', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                const time = new Date(transaction.timestamp).toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Handle different transaction types
+                let typeText, typeClass, transactionIcon, detailsHtml;
+                
+                if (transaction.type === 'pindah') {
+                    typeText = 'Pindah Gudang';
+                    typeClass = 'pindah';
+                    transactionIcon = '🚚';
+                    detailsHtml = `
+                        <div><strong>Jumlah:</strong> ${transaction.quantity}</div>
+                        <div><strong>Dari:</strong> ${transaction.fromWarehouse}</div>
+                        <div><strong>Ke:</strong> ${transaction.toWarehouse}</div>
+                        <div><strong>Tanggal:</strong> ${date}</div>
+                    `;
+                } else {
+                    typeText = transaction.type === 'masuk' ? 'Masuk' : 'Keluar';
+                    typeClass = transaction.type;
+                    transactionIcon = transaction.type === 'masuk' ? '📥' : '📤';
+                    
+                    const item = inventory.find(i => i.id === transaction.itemId);
+                    const unitPrice = item ? item.price : 0;
+                    const totalValue = unitPrice * transaction.quantity;
+                    
+                    detailsHtml = `
+                        <div><strong>Jumlah:</strong> ${transaction.quantity} ${item ? item.unit : ''}</div>
+                        <div><strong>Stok:</strong> ${transaction.oldStock} → ${transaction.newStock}</div>
+                        <div><strong>Harga Satuan:</strong> ${formatRupiah(unitPrice)}</div>
+                        <div><strong>Total Nilai:</strong> ${formatRupiah(totalValue)}</div>
+                        <div><strong>Gudang:</strong> ${transaction.warehouseName || '-'}</div>
+                        <div><strong>Waktu:</strong> ${time}</div>
+                    `;
+                }
+                
+                return `
+                    <div class="transaction-item ${typeClass}">
+                        <div class="transaction-icon">${transactionIcon}</div>
+                        <div class="transaction-content">
+                            <div class="transaction-header">
+                                <div class="transaction-title">${typeText}: ${transaction.itemName}</div>
+                                <div class="transaction-date">${date}</div>
+                            </div>
+                            <div class="transaction-details">
+                                ${detailsHtml}
+                            </div>
+                            ${transaction.note ? `<div class="transaction-note">📝 ${transaction.note}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Filter transactions
+        function filterTransactions() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filterType = document.getElementById('filterType').value;
+            const filterWarehouseId = document.getElementById('filterWarehouse').value;
+            const filterDate = document.getElementById('filterDate').value;
+            
+            let filtered = transactions;
+            
+            // Filter by search term
+            if (searchTerm) {
+                filtered = filtered.filter(t => 
+                    t.itemName.toLowerCase().includes(searchTerm) ||
+                    (t.note && t.note.toLowerCase().includes(searchTerm)) ||
+                    (t.warehouseName && t.warehouseName.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            // Filter by type
+            if (filterType) {
+                filtered = filtered.filter(t => t.type === filterType);
+            }
+            
+            // Filter by warehouse
+            if (filterWarehouseId) {
+                filtered = filtered.filter(t => 
+                    t.warehouseId == filterWarehouseId ||
+                    (t.type === 'pindah' && (t.fromWarehouseId == filterWarehouseId || t.toWarehouseId == filterWarehouseId))
+                );
+            }
+            
+            // Filter by date
+            if (filterDate) {
+                filtered = filtered.filter(t => t.date === filterDate);
+            }
+            
+            displayTransactions(filtered);
+        }
+        
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('searchBox').value = '';
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterWarehouse').value = '';
+            document.getElementById('filterDate').value = '';
+            displayTransactions();
+        }
+        
+        // Export transactions
+        function exportTransactions() {
+            try {
+                const exportData = {
+                    transactions: transactions,
+                    exportDate: new Date().toISOString(),
+                    totalTransactions: transactions.length,
+                    summary: {
+                        totalMasuk: transactions.filter(t => t.type === 'masuk').length,
+                        totalKeluar: transactions.filter(t => t.type === 'keluar').length,
+                        totalPindah: transactions.filter(t => t.type === 'pindah').length
+                    }
+                };
+                
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `riwayat-transaksi-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert('Riwayat transaksi berhasil diekspor!');
+            } catch (error) {
+                console.error('Failed to export:', error);
+                alert('Gagal mengekspor riwayat transaksi.');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            updateWarehouseFilter();
+            updateStatistics();
+            displayTransactions();
+        });
+        
+        // Auto refresh every 5 seconds
+        setInterval(function() {
+            loadData();
+            updateStatistics();
+            filterTransactions();
+        }, 5000);
+    </script>
+</body>
+</html>

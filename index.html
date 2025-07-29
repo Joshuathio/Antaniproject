@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Stok Toko Pertanian - Multi Gudang</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Stok toko</h1>
+        
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3 id="totalItems">0</h3>
+                <p>Total Jenis Barang</p>
+            </div>
+            <div class="summary-card">
+                <h3 id="lowStockItems">0</h3>
+                <p>Stok Menipis</p>
+            </div>
+            <div class="summary-card">
+                <h3 id="totalValue">Rp 0</h3>
+                <p>Total Nilai Stok</p>
+            </div>
+            <div class="summary-card">
+                <h3 id="totalWarehouses">0</h3>
+                <p>Total Gudang</p>
+            </div>
+        </div>
+
+        <!-- Form Manajemen Gudang -->
+        <div class="form-section">
+            <h2 class="form-title">🏭 Manajemen Gudang</h2>
+            <div class="warehouse-management">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nama Gudang:</label>
+                        <input type="text" id="warehouseName" placeholder="Contoh: Gudang Pusat, Gudang Cabang A">
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi:</label>
+                        <input type="text" id="warehouseLocation" placeholder="Contoh: Jl. Pertanian No. 123">
+                    </div>
+                    <div class="form-group">
+                        <label>Kapasitas (m²):</label>
+                        <input type="number" id="warehouseCapacity" min="0" placeholder="100">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addWarehouse()">➕ Tambah Gudang</button>
+                
+                <!-- Daftar Gudang -->
+                <div class="warehouse-list" id="warehouseList">
+                    <!-- Gudang akan ditampilkan di sini -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Tambah Barang -->
+        <div class="form-section">
+            <h2 class="form-title">📦 Tambah Barang Baru</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nama Barang:</label>
+                    <input type="text" id="itemName" placeholder="Contoh: Pupuk NPK">
+                </div>
+                <div class="form-group">
+                    <label>Satuan:</label>
+                    <input type="text" id="itemUnit" placeholder="Contoh: Kg, Liter, Karung">
+                </div>
+                <div class="form-group">
+                    <label>Gudang:</label>
+                    <select id="itemWarehouse">
+                        <option value="">-- Pilih Gudang --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Stok Awal:</label>
+                    <input type="number" id="itemStock" min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Harga per Satuan (Rp):</label>
+                    <input type="number" id="itemPrice" min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Stok Minimum:</label>
+                    <input type="number" id="minStock" min="0" placeholder="10">
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="addItem()">➕ Tambah Barang</button>
+        </div>
+
+        <!-- Form Update Stok -->
+        <div class="form-section">
+            <h2 class="form-title">🔄 Update Stok</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Pilih Barang:</label>
+                    <select id="updateItemSelect">
+                        <option value="">-- Pilih Barang --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jenis Transaksi:</label>
+                    <select id="transactionType">
+                        <option value="masuk">Barang Masuk</option>
+                        <option value="keluar">Barang Keluar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal:</label>
+                    <input type="date" id="transactionDate">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Jumlah:</label>
+                    <input type="number" id="updateQuantity" min="1" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Keterangan (Optional):</label>
+                    <input type="text" id="transactionNote" placeholder="Contoh: Dari supplier ABC">
+                </div>
+            </div>
+            <button class="btn btn-warning" onclick="updateStock()">📝 Update Stok</button>
+        </div>
+
+        <!-- Form Pindah Gudang -->
+        <div class="form-section">
+            <h2 class="form-title">🚚 Pindah Gudang</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Pilih Barang:</label>
+                    <select id="moveItemSelect">
+                        <option value="">-- Pilih Barang --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pindah ke Gudang:</label>
+                    <select id="moveToWarehouse">
+                        <option value="">-- Pilih Gudang Tujuan --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah yang Dipindah:</label>
+                    <input type="number" id="moveQuantity" min="1" placeholder="0">
+                </div>
+            </div>
+            <button class="btn btn-info" onclick="moveToWarehouse()">🚚 Pindah Gudang</button>
+        </div>
+
+        <!-- Pencarian dan Tabel Stok -->
+        <div class="form-section">
+            <h2 class="form-title">📋 Daftar Stok Barang</h2>
+            
+            <!-- Tombol Data Management -->
+            <div class="data-management">
+                <button class="btn" onclick="exportData()">📥 Ekspor Data</button>
+                <label class="btn" style="cursor: pointer; margin: 0;">
+                    📤 Impor Data
+                    <input type="file" accept=".json" onchange="importData(event)" style="display: none;">
+                </label>
+                <a href="riwayat.html" class="btn" style="text-decoration: none; text-align: center;">📊 Riwayat Transaksi</a>
+                <button class="btn btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+                <div class="data-status">
+                    💾 Data tersimpan otomatis
+                </div>
+            </div>
+            
+            <!-- Filter by Warehouse -->
+            <div class="filter-controls">
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Cari barang..." onkeyup="searchItems()">
+                <select class="filter-warehouse" id="filterWarehouse" onchange="filterByWarehouse()">
+                    <option value="">Semua Gudang</option>
+                </select>
+            </div>
+            
+            <table class="stock-table" id="stockTable">
+                <thead>
+                    <tr>
+                        <th>Nama Barang</th>
+                        <th>Gudang</th>
+                        <th>Stok</th>
+                        <th>Satuan</th>
+                        <th>Harga</th>
+                        <th>Nilai Total</th>
+                        <th>Update Terakhir</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="stockTableBody">
+                    <!-- Data akan ditampilkan di sini -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>

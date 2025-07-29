@@ -1,0 +1,517 @@
+/* Green Theme - Sistem Stok Toko Pertanian */
+
+/* Reset CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Root Variables - Green Theme */
+:root {
+    --primary-green: #2ecc71;
+    --dark-green: #27ae60;
+    --light-green: #a8e6cf;
+    --pale-green: #dff8eb;
+    --success-green: #00b894;
+    --forest-green: #00684a;
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --gray: #95a5a6;
+    --dark-gray: #2c3e50;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+    --info: #3498db;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+/* Body Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%);
+    min-height: 100vh;
+    padding: 10px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Background Pattern */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(46, 204, 113, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(39, 174, 96, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(0, 184, 148, 0.1) 0%, transparent 50%);
+    z-index: -1;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 40px var(--shadow);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.6s ease-out;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+h1 {
+    text-align: center;
+    color: var(--dark-green);
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+h1::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green), var(--dark-green));
+    border-radius: 2px;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+@media (min-width: 768px) {
+    .summary-cards {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+.summary-card {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(46, 204, 113, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+     align-items: center;
+    justify-content: center;
+}
+
+.summary-card::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: rotate(45deg);
+    
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(46, 204, 113, 0.4);
+}
+
+.summary-card h3 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.summary-card p {
+    font-size: 1.1em;
+    opacity: 0.95;
+}
+
+/* Form Sections */
+.form-section {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px var(--shadow);
+    border: 2px solid var(--pale-green);
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: var(--light-green);
+    box-shadow: 0 15px 40px var(--shadow-hover);
+}
+
+.form-title {
+    font-size: 1.5em;
+    color: var(--dark-green);
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid var(--primary-green);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+input, select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+@media (min-width: 768px) {
+    .form-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+}
+
+/* Buttons */
+.btn {
+    background: linear-gradient(45deg, var(--primary-green), var(--dark-green));
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, var(--success-green), var(--forest-green));
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, var(--warning), #e67e22);
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, var(--danger), #c0392b);
+}
+
+.btn-info {
+    background: linear-gradient(45deg, var(--info), #2980b9);
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* Warehouse Management Specific */
+.warehouse-management {
+    margin-top: 20px;
+}
+
+.warehouse-list {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.warehouse-item {
+    background: var(--light-gray);
+    border: 2px solid var(--pale-green);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.warehouse-item:hover {
+    background: var(--pale-green);
+    transform: translateX(5px);
+}
+
+.warehouse-info h4 {
+    color: var(--dark-green);
+    margin-bottom: 5px;
+}
+
+.warehouse-info p {
+    color: var(--gray);
+    font-size: 0.9em;
+    margin-bottom: 3px;
+}
+
+.no-data {
+    text-align: center;
+    color: var(--gray);
+    padding: 20px;
+    font-style: italic;
+}
+
+/* Filter Controls */
+.filter-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+    .filter-controls {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+.search-box {
+    padding: 12px 20px;
+    border: 2px solid var(--light-green);
+    border-radius: 10px;
+    font-size: 16px;
+    background: white;
+}
+
+.search-box:focus {
+    border-color: var(--primary-green);
+}
+
+.filter-warehouse {
+    padding: 12px 15px;
+    border: 2px solid var(--light-green);
+    border-radius: 10px;
+    background: white;
+}
+
+/* Table Styling */
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+.stock-table thead {
+    background: linear-gradient(45deg, var(--dark-green), var(--primary-green));
+    color: white;
+}
+
+.stock-table th,
+.stock-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.stock-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    letter-spacing: 0.5px;
+}
+
+.stock-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.stock-table tbody tr:hover {
+    background-color: var(--pale-green);
+    transform: scale(1.01);
+}
+
+/* Stock Status */
+.stock-low {
+    background-color: #ffebee !important;
+    color: var(--danger);
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.stock-good {
+    background-color: var(--pale-green) !important;
+    color: var(--dark-green);
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* Table Actions */
+.stock-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Data Management */
+.data-management {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.data-status {
+    margin-left: auto;
+    color: var(--dark-green);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light-gray);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-green);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dark-green);
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(46, 204, 113, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-green);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .form-section {
+        padding: 20px;
+    }
+    
+    .stock-table {
+        font-size: 14px;
+    }
+    
+    .stock-table th,
+    .stock-table td {
+        padding: 10px;
+    }
+    
+    .data-management {
+        flex-direction: column;
+    }
+    
+    .data-status {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
