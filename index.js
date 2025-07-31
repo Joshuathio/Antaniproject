@@ -491,7 +491,8 @@ function updateStockTable() {
     if (filterWarehouseId) {
         filteredInventory = inventory.filter(item => item.warehouseId == filterWarehouseId);
     }
-    
+    filteredInventory.sort((a, b) => a.name.localeCompare(b.name));
+
     tbody.innerHTML = '';
 
     filteredInventory.forEach(item => {
@@ -530,8 +531,9 @@ function updateItemSelects() {
         if (!select) return;
         
         select.innerHTML = '<option value="">-- Pilih Barang --</option>';
+         const sortedInventory = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
 
-        inventory.forEach(item => {
+        sortedInventory.forEach(item => {
             const option = document.createElement('option');
             option.value = item.id;
             option.textContent = `${item.name} (${item.stock} ${item.unit}) - ${item.warehouseName}`;
