@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Stok toko</h1>
+        <h1>🌾 Sistem Stok Toko Pertanian - Multi Gudang</h1>
         
         <!-- Summary Cards -->
         <div class="summary-cards">
@@ -67,7 +67,24 @@
                 </div>
                 <div class="form-group">
                     <label>Satuan:</label>
-                    <input type="text" id="itemUnit" placeholder="Contoh: Kg, Liter, Karung">
+                    <select id="itemUnit">
+                        <option value="">-- Pilih Satuan --</option>
+                        <option value="Kg">Kilogram (Kg)</option>
+                        <option value="Gram">Gram</option>
+                        <option value="Liter">Liter</option>
+                        <option value="Mililiter">Mililiter (ml)</option>
+                        <option value="Karung">Karung</option>
+                        <option value="Sak">Sak</option>
+                        <option value="Botol">Botol</option>
+                        <option value="Pack">Pack</option>
+                        <option value="Box">Box</option>
+                        <option value="Dus">Dus</option>
+                        <option value="Pcs">Pcs</option>
+                        <option value="Jerigen">Jerigen</option>
+                        <option value="Galon">Galon</option>
+                        <option value="Meter">Meter</option>
+                        <option value="Cm">Centimeter</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Gudang:</label>
@@ -163,7 +180,7 @@
                     📤 Impor Data
                     <input type="file" accept=".json" onchange="importData(event)" style="display: none;">
                 </label>
-                <a href="Riwayat.html" class="btn" style="text-decoration: none; text-align: center;">📊 Riwayat Transaksi</a>
+                <a href="riwayat.html" class="btn" style="text-decoration: none; text-align: center;">📊 Riwayat Transaksi</a>
                 <button class="btn btn-danger" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
                 <div class="data-status">
                     💾 Data tersimpan otomatis
@@ -196,6 +213,41 @@
                     <!-- Data akan ditampilkan di sini -->
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Modal Edit Barang -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Barang</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editItemId">
+                <div class="form-group">
+                    <label>Nama Barang:</label>
+                    <input type="text" id="editItemName" placeholder="Nama barang">
+                </div>
+                <div class="form-group">
+                    <label>Satuan:</label>
+                    <select id="editItemUnit">
+                        <option value="Kg">karung</option>
+                        <option value="Gram">karton (gr)</option>
+                        <option value="Mililiter">karton (ml)</option>
+                  
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Harga per Satuan (Rp):</label>
+                    <input type="number" id="editItemPrice" min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Stok Minimum:</label>
+                    <input type="number" id="editMinStock" min="0" placeholder="10">
+                </div>
+                <button class="btn btn-success" onclick="saveEditItem()">💾 Simpan Perubahan</button>
+            </div>
         </div>
     </div>
 

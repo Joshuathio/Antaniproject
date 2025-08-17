@@ -33,6 +33,25 @@ function loadData() {
             inventory = data.inventory || [];
             transactions = data.transactions || [];
             warehouses = data.warehouses || [];
+            
+            // Check if we need to update units to Mililiter (one-time update)
+            const unitUpdateDone = localStorage.getItem('unitUpdateToMililiter');
+            if (!unitUpdateDone) {
+                let updated = false;
+                inventory.forEach(item => {
+                    // Update all existing items to Mililiter
+                    item.unit = 'Mililiter';
+                    updated = true;
+                });
+                
+                if (updated && inventory.length > 0) {
+                    saveData();
+                    localStorage.setItem('unitUpdateToMililiter', 'done');
+                    console.log('Updated all existing items to Mililiter');
+                    alert('Semua barang yang ada telah diubah satuannya menjadi Mililiter');
+                }
+            }
+            
             console.log('Data berhasil dimuat:', inventory.length + ' item, ' + 
                        transactions.length + ' transaksi, ' + warehouses.length + ' gudang');
             return true;
@@ -116,6 +135,7 @@ function clearAllData() {
             transactions = [];
             warehouses = [];
             localStorage.removeItem('tokoPerananianData');
+            localStorage.removeItem('unitUpdateToMililiter'); // Clear update flag
             updateDisplay();
             alert('Semua data berhasil dihapus!');
         }
@@ -144,7 +164,7 @@ function clearWarehouseForm() {
 
 function clearForm() {
     document.getElementById('itemName').value = '';
-    document.getElementById('itemUnit').value = '';
+    document.getElementById('itemUnit').selectedIndex = 0; // Reset to first option
     document.getElementById('itemStock').value = '';
     document.getElementById('itemPrice').value = '';
     document.getElementById('minStock').value = '';
@@ -217,7 +237,7 @@ function deleteWarehouse(id) {
 
 // Fungsi tambah barang
 function addItem() {
-    const name = document.getElementById('itemName').value;
+    const name = document.getElementById('itemName').value.trim();
     const unit = document.getElementById('itemUnit').value;
     const stock = parseInt(document.getElementById('itemStock').value) || 0;
     const price = parseInt(document.getElementById('itemPrice').value) || 0;
@@ -226,6 +246,17 @@ function addItem() {
 
     if (!name || !unit || !warehouseId) {
         alert('Nama barang, satuan, dan gudang harus diisi!');
+        return;
+    }
+
+    // Cek apakah barang dengan nama yang sama sudah ada di gudang yang sama (case insensitive)
+    const existingItem = inventory.find(item => 
+        item.name.toLowerCase() === name.toLowerCase() && 
+        item.warehouseId == warehouseId
+    );
+    
+    if (existingItem) {
+        alert(`Barang "${name}" sudah ada di gudang ini! Gunakan fitur update stok untuk menambah stok.`);
         return;
     }
 
@@ -298,6 +329,7 @@ function updateStock() {
             note: note || '',
             oldStock: oldStock,
             newStock: item.stock,
+            unit: item.unit,
             timestamp: new Date().toISOString()
         };
         
@@ -341,20 +373,29 @@ function moveToWarehouse() {
 
     const oldWarehouseName = item.warehouseName;
 
-    // Jika memindahkan semua stok
-    if (quantity === item.stock) {
-        item.warehouseId = parseInt(newWarehouseId);
-        item.warehouseName = newWarehouse.name;
-    } else {
-        // Jika memindahkan sebagian, buat item baru di gudang tujuan
-        const existingItem = inventory.find(i => 
-            i.name === item.name && 
-            i.warehouseId == newWarehouseId
-        );
+    // Cari apakah barang dengan nama yang sama sudah ada di gudang tujuan (case insensitive)
+    const existingItem = inventory.find(i => 
+        i.name.toLowerCase() === item.name.toLowerCase() && 
+        i.warehouseId == newWarehouseId
+    );
 
-        if (existingItem) {
-            // Jika barang sudah ada di gudang tujuan, tambah stoknya
-            existingItem.stock += quantity;
+    if (existingItem) {
+        // Jika sudah ada, tambahkan stoknya
+        existingItem.stock += quantity;
+        existingItem.lastUpdated = new Date().toISOString().split('T')[0];
+        
+        // Kurangi stok di gudang asal
+        item.stock -= quantity;
+        
+        // Jika stok di gudang asal habis, hapus item
+        if (item.stock === 0) {
+            inventory = inventory.filter(i => i.id !== item.id);
+        }
+    } else {
+        // Jika memindahkan semua stok
+        if (quantity === item.stock) {
+            item.warehouseId = parseInt(newWarehouseId);
+            item.warehouseName = newWarehouse.name;
         } else {
             // Buat item baru di gudang tujuan
             const newItem = {
@@ -365,10 +406,10 @@ function moveToWarehouse() {
                 warehouseName: newWarehouse.name
             };
             inventory.push(newItem);
+            
+            // Kurangi stok di gudang asal
+            item.stock -= quantity;
         }
-        
-        // Kurangi stok di gudang asal
-        item.stock -= quantity;
     }
 
     // Catat transaksi pindah gudang
@@ -404,6 +445,78 @@ function deleteItem(id) {
 }
 
 // =====================================
+// EDIT ITEM FUNCTIONS
+// =====================================
+
+// Fungsi buka modal edit
+function editItem(id) {
+    const item = inventory.find(item => item.id === id);
+    if (!item) return;
+    
+    document.getElementById('editItemId').value = id;
+    document.getElementById('editItemName').value = item.name;
+    document.getElementById('editItemUnit').value = item.unit;
+    document.getElementById('editItemPrice').value = item.price;
+    document.getElementById('editMinStock').value = item.minStock;
+    
+    document.getElementById('editModal').style.display = 'block';
+}
+
+// Fungsi tutup modal edit
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+// Fungsi simpan perubahan edit
+function saveEditItem() {
+    const id = parseInt(document.getElementById('editItemId').value);
+    const newName = document.getElementById('editItemName').value.trim();
+    const newUnit = document.getElementById('editItemUnit').value;
+    const newPrice = parseInt(document.getElementById('editItemPrice').value) || 0;
+    const newMinStock = parseInt(document.getElementById('editMinStock').value) || 10;
+    
+    if (!newName || !newUnit) {
+        alert('Nama barang dan satuan harus diisi!');
+        return;
+    }
+    
+    const item = inventory.find(item => item.id === id);
+    if (!item) return;
+    
+    // Cek apakah nama baru sudah ada di gudang yang sama (kecuali item yang sedang diedit)
+    const duplicateItem = inventory.find(i => 
+        i.id !== id &&
+        i.name.toLowerCase() === newName.toLowerCase() && 
+        i.warehouseId === item.warehouseId
+    );
+    
+    if (duplicateItem) {
+        alert(`Barang dengan nama "${newName}" sudah ada di gudang ini!`);
+        return;
+    }
+    
+    // Update item
+    item.name = newName;
+    item.unit = newUnit;
+    item.price = newPrice;
+    item.minStock = newMinStock;
+    item.lastUpdated = new Date().toISOString().split('T')[0];
+    
+    saveData();
+    updateDisplay();
+    closeEditModal();
+    alert('Barang berhasil diperbarui!');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target === modal) {
+        closeEditModal();
+    }
+}
+
+// =====================================
 // DISPLAY UPDATE FUNCTIONS
 // =====================================
 
@@ -414,6 +527,7 @@ function updateDisplay() {
     updateWarehouseSelects();
     updateStockTable();
     updateItemSelects();
+    updateMoveItemSelect();
 }
 
 // Update summary cards
@@ -491,8 +605,10 @@ function updateStockTable() {
     if (filterWarehouseId) {
         filteredInventory = inventory.filter(item => item.warehouseId == filterWarehouseId);
     }
+    
+    // Sort berdasarkan nama barang (A-Z)
     filteredInventory.sort((a, b) => a.name.localeCompare(b.name));
-
+    
     tbody.innerHTML = '';
 
     filteredInventory.forEach(item => {
@@ -515,6 +631,7 @@ function updateStockTable() {
             <td title="${lastUpdate}">${lastUpdate}</td>
             <td class="${statusClass}" title="${status}">${status}</td>
             <td class="stock-actions">
+                <button class="btn btn-info btn-sm" onclick="editItem(${item.id})" title="Edit">✏️</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})" title="Hapus">🗑️</button>
             </td>
         `;
@@ -522,24 +639,86 @@ function updateStockTable() {
     });
 }
 
-// Update item selects
+// Update item selects (untuk update stok)
 function updateItemSelects() {
-    const selects = ['updateItemSelect', 'moveItemSelect'];
+    const select = document.getElementById('updateItemSelect');
+    if (!select) return;
     
-    selects.forEach(selectId => {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-        
-        select.innerHTML = '<option value="">-- Pilih Barang --</option>';
-         const sortedInventory = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
+    select.innerHTML = '<option value="">-- Pilih Barang --</option>';
 
-        sortedInventory.forEach(item => {
+    // Sort inventory berdasarkan nama barang (A-Z)
+    const sortedInventory = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedInventory.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = `${item.name} (${item.stock} ${item.unit}) - ${item.warehouseName}`;
+        select.appendChild(option);
+    });
+}
+
+// Update dropdown pilihan barang untuk pindah gudang
+function updateMoveItemSelect() {
+    const select = document.getElementById('moveItemSelect');
+    const moveToWarehouseSelect = document.getElementById('moveToWarehouse');
+    
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">-- Pilih Barang --</option>';
+    
+    // Group items by name untuk memudahkan identifikasi barang yang sama
+    const itemGroups = {};
+    inventory.forEach(item => {
+        const key = item.name.toLowerCase();
+        if (!itemGroups[key]) {
+            itemGroups[key] = [];
+        }
+        itemGroups[key].push(item);
+    });
+    
+    // Sort dan tampilkan items
+    const sortedInventory = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedInventory.forEach(item => {
+        if (item.stock > 0) { // Hanya tampilkan yang ada stoknya
             const option = document.createElement('option');
             option.value = item.id;
             option.textContent = `${item.name} (${item.stock} ${item.unit}) - ${item.warehouseName}`;
             select.appendChild(option);
-        });
+        }
     });
+    
+    // Update warehouse select saat item dipilih
+    select.onchange = function() {
+        if (!this.value) return;
+        
+        const selectedItem = inventory.find(item => item.id == this.value);
+        if (!selectedItem) return;
+        
+        // Update move to warehouse options
+        moveToWarehouseSelect.innerHTML = '<option value="">-- Pilih Gudang Tujuan --</option>';
+        
+        warehouses.forEach(warehouse => {
+            if (warehouse.id != selectedItem.warehouseId) { // Exclude current warehouse
+                const option = document.createElement('option');
+                option.value = warehouse.id;
+                
+                // Check if same item exists in target warehouse
+                const existingInTarget = inventory.find(i => 
+                    i.name.toLowerCase() === selectedItem.name.toLowerCase() && 
+                    i.warehouseId == warehouse.id
+                );
+                
+                if (existingInTarget) {
+                    option.textContent = `${warehouse.name} (Ada ${existingInTarget.stock} ${existingInTarget.unit})`;
+                } else {
+                    option.textContent = warehouse.name;
+                }
+                
+                moveToWarehouseSelect.appendChild(option);
+            }
+        });
+    };
 }
 
 // =====================================
