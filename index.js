@@ -34,9 +34,6 @@ function loadData() {
             transactions = data.transactions || [];
             warehouses = data.warehouses || [];
             
-            // Check if we need to update units to Mililiter (one-time update)
-    
-            
             console.log('Data berhasil dimuat:', inventory.length + ' item, ' + 
                        transactions.length + ' transaksi, ' + warehouses.length + ' gudang');
             return true;
@@ -120,7 +117,6 @@ function clearAllData() {
             transactions = [];
             warehouses = [];
             localStorage.removeItem('tokoPerananianData');
-            localStorage.removeItem('unitUpdateToMililiter'); // Clear update flag
             updateDisplay();
             alert('Semua data berhasil dihapus!');
         }
@@ -149,7 +145,7 @@ function clearWarehouseForm() {
 
 function clearForm() {
     document.getElementById('itemName').value = '';
-    document.getElementById('itemUnit').selectedIndex = 0; // Reset to first option
+    document.getElementById('itemUnit').selectedIndex = 0;
     document.getElementById('itemStock').value = '';
     document.getElementById('itemPrice').value = '';
     document.getElementById('minStock').value = '';
@@ -650,16 +646,6 @@ function updateMoveItemSelect() {
     if (!select) return;
     
     select.innerHTML = '<option value="">-- Pilih Barang --</option>';
-    
-    // Group items by name untuk memudahkan identifikasi barang yang sama
-    const itemGroups = {};
-    inventory.forEach(item => {
-        const key = item.name.toLowerCase();
-        if (!itemGroups[key]) {
-            itemGroups[key] = [];
-        }
-        itemGroups[key].push(item);
-    });
     
     // Sort dan tampilkan items
     const sortedInventory = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
