@@ -35,22 +35,7 @@ function loadData() {
             warehouses = data.warehouses || [];
             
             // Check if we need to update units to Mililiter (one-time update)
-            const unitUpdateDone = localStorage.getItem('unitUpdateToMililiter');
-            if (!unitUpdateDone) {
-                let updated = false;
-                inventory.forEach(item => {
-                    // Update all existing items to Mililiter
-                    item.unit = 'Mililiter';
-                    updated = true;
-                });
-                
-                if (updated && inventory.length > 0) {
-                    saveData();
-                    localStorage.setItem('unitUpdateToMililiter', 'done');
-                    console.log('Updated all existing items to Mililiter');
-                    alert('Semua barang yang ada telah diubah satuannya menjadi Mililiter');
-                }
-            }
+    
             
             console.log('Data berhasil dimuat:', inventory.length + ' item, ' + 
                        transactions.length + ' transaksi, ' + warehouses.length + ' gudang');
