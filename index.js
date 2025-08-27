@@ -668,6 +668,76 @@ document.addEventListener('click', function(event) {
         dropdown.style.display = 'none';
     }
 });
+function initMobileSupport() {
+    const searchInput = document.getElementById('updateItemSearch');
+    const dropdown = document.getElementById('updateItemDropdown');
+    
+    if (searchInput && dropdown) {
+        // Touch events untuk mobile
+        searchInput.addEventListener('touchstart', showUpdateDropdown);
+        searchInput.addEventListener('click', showUpdateDropdown);
+        
+        // Prevent zoom di mobile
+        searchInput.addEventListener('touchstart', function(e) {
+            if (window.innerWidth < 768) {
+                searchInput.style.fontSize = '16px';
+            }
+        });
+    }
+}
+
+// Update fungsi selectUpdateItem untuk mobile
+function selectUpdateItem(itemId, itemName) {
+    const searchInput = document.getElementById('updateItemSearch');
+    const hiddenInput = document.getElementById('updateItemSelect');
+    const dropdown = document.getElementById('updateItemDropdown');
+    
+    // Set values
+    searchInput.value = itemName;
+    hiddenInput.value = itemId;
+    
+    // Hide dropdown
+    dropdown.style.display = 'none';
+    
+    // Blur input untuk mobile
+    searchInput.blur();
+    
+    // Optional: Show item details
+    const item = inventory.find(i => i.id === itemId);
+    if (item) {
+        console.log(`Selected: ${item.name} - Stock: ${item.stock} ${item.unit} - Warehouse: ${item.warehouseName}`);
+    }
+}
+
+// Update document click handler untuk mobile
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('updateItemDropdown');
+    const searchInput = document.getElementById('updateItemSearch');
+    
+    if (dropdown && searchInput && 
+        !dropdown.contains(event.target) && 
+        event.target !== searchInput) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Tambahkan touch event juga
+document.addEventListener('touchstart', function(event) {
+    const dropdown = document.getElementById('updateItemDropdown');
+    const searchInput = document.getElementById('updateItemSearch');
+    
+    if (dropdown && searchInput && 
+        !dropdown.contains(event.target) && 
+        event.target !== searchInput) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Panggil saat DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    initApp();
+    initMobileSupport(); // Tambahkan ini
+});
 
 
 // Update tabel stok
