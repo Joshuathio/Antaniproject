@@ -576,6 +576,99 @@ function updateWarehouseSelects() {
         select.value = currentValue;
     });
 }
+function showUpdateDropdown() {
+    const dropdown = document.getElementById('updateItemDropdown');
+    populateUpdateDropdown();
+    dropdown.style.display = 'block';
+}
+
+// Fungsi untuk populate dropdown dengan semua items
+function populateUpdateDropdown(searchTerm = '') {
+    const dropdown = document.getElementById('updateItemDropdown');
+    
+    // Filter inventory berdasarkan search term
+    let filteredItems = inventory;
+    if (searchTerm) {
+        filteredItems = inventory.filter(item => 
+            item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.warehouseName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+    
+    // Sort berdasarkan nama
+    filteredItems.sort((a, b) => a.name.localeCompare(b.name));
+    
+    if (filteredItems.length === 0) {
+        dropdown.innerHTML = '<div class="no-results">Tidak ada barang ditemukan</div>';
+        return;
+    }
+    
+    dropdown.innerHTML = filteredItems.map(item => {
+        const stockStatus = item.stock <= item.minStock ? 'Stok Menipis' : 'Stok Aman';
+        const stockClass = item.stock <= item.minStock ? 'stock-low' : 'stock-good';
+        
+        return `
+            <div class="dropdown-item" onclick="selectUpdateItem(${item.id}, '${item.name.replace(/'/g, "\\'")}')">
+                <div>
+                    <div class="dropdown-item-name">${item.name}</div>
+                    <div class="dropdown-item-details">🏭 ${item.warehouseName} | ${item.unit}</div>
+                </div>
+                <div>
+                    <span class="dropdown-item-stock ${stockClass}">${item.stock} ${item.unit}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Fungsi search items untuk update
+function searchUpdateItems() {
+    const searchTerm = document.getElementById('updateItemSearch').value;
+    
+    // Clear selected item jika search berubah
+    document.getElementById('updateItemSelect').value = '';
+    
+    populateUpdateDropdown(searchTerm);
+    
+    // Show dropdown jika ada input
+    const dropdown = document.getElementById('updateItemDropdown');
+    if (searchTerm.length > 0) {
+        dropdown.style.display = 'block';
+    }
+}
+
+// Fungsi select item dari dropdown
+function selectUpdateItem(itemId, itemName) {
+    const searchInput = document.getElementById('updateItemSearch');
+    const hiddenInput = document.getElementById('updateItemSelect');
+    const dropdown = document.getElementById('updateItemDropdown');
+    
+    // Set values
+    searchInput.value = itemName;
+    hiddenInput.value = itemId;
+    
+    // Hide dropdown
+    dropdown.style.display = 'none';
+    
+    // Optional: Show item details
+    const item = inventory.find(i => i.id === itemId);
+    if (item) {
+        console.log(`Selected: ${item.name} - Stock: ${item.stock} ${item.unit} - Warehouse: ${item.warehouseName}`);
+    }
+}
+
+// Hide dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('updateItemDropdown');
+    const searchInput = document.getElementById('updateItemSearch');
+    
+    if (dropdown && searchInput && 
+        !dropdown.contains(event.target) && 
+        event.target !== searchInput) {
+        dropdown.style.display = 'none';
+    }
+});
+
 
 // Update tabel stok
 function updateStockTable() {
@@ -750,6 +843,7 @@ function initApp() {
 document.addEventListener('DOMContentLoaded', function() {
     initApp();
 });
+
 
 // Auto-save setiap 30 detik
 setInterval(function() {

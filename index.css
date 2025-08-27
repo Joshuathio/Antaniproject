@@ -759,7 +759,26 @@ input:focus, select:focus {
     width: 100%;
     margin-top: 10px;
 }
+#updateItemSelect[size] {
+    height: 150px;
+    overflow-y: auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 5px;
+}
 
+#updateItemSelect[size] option {
+    padding: 8px;
+    cursor: pointer;
+}
+
+#updateItemSelect[size] option:hover {
+    background-color: var(--pale-green);
+}
+
+#searchUpdateItem {
+    margin-bottom: 10px;
+}
 @keyframes modalFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -768,4 +787,62 @@ input:focus, select:focus {
 @keyframes modalSlideIn {
     from { transform: translateY(-50px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+
+.search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid var(--light-green);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-item:hover {
+    background-color: var(--pale-green);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item-name {
+    font-weight: 600;
+    color: black;
+}
+
+.dropdown-item-details {
+    font-size: 0.9em;
+    color:black;
+}
+
+.dropdown-item-stock {
+    font-size: 0.85em;
+    background: var(--light-green);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--dark-green);
+}
+
+.no-results {
+    padding: 15px;
+    text-align: center;
+    color: var(--gray);
+    font-style: italic;
 }
