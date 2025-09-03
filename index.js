@@ -369,9 +369,7 @@ function moveToWarehouse() {
         item.stock -= quantity;
         
         // Jika stok di gudang asal habis, hapus item
-        if (item.stock === 0) {
-            inventory = inventory.filter(i => i.id !== item.id);
-        }
+        
     } else {
         // Jika memindahkan semua stok
         if (quantity === item.stock) {
