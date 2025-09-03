@@ -812,12 +812,12 @@ function updateMoveItemSelect() {
     const sortedInventory = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
     
     sortedInventory.forEach(item => {
-        if (item.stock > 0) { // Hanya tampilkan yang ada stoknya
+     // Hanya tampilkan yang ada stoknya
             const option = document.createElement('option');
             option.value = item.id;
             option.textContent = `${item.name} (${item.stock} ${item.unit}) - ${item.warehouseName}`;
             select.appendChild(option);
-        }
+        
     });
     
     // Update warehouse select saat item dipilih
