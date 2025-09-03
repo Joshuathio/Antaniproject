@@ -371,11 +371,8 @@ function moveToWarehouse() {
         // Jika stok di gudang asal habis, hapus item
         
     } else {
-        // Jika memindahkan semua stok
-        if (quantity === item.stock) {
-            item.warehouseId = parseInt(newWarehouseId);
-            item.warehouseName = newWarehouse.name;
-        } else {
+      
+       
             // Buat item baru di gudang tujuan
             const newItem = {
                 ...item,
@@ -388,7 +385,7 @@ function moveToWarehouse() {
             
             // Kurangi stok di gudang asal
             item.stock -= quantity;
-        }
+        
     }
 
     // Catat transaksi pindah gudang
